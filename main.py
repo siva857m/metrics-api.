@@ -67,4 +67,3 @@ async def effective_config(request: Request):
     masked["api_key"] = "****"
 
     return JSONResponse(masked)
-
