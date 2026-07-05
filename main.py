@@ -1,5 +1,3 @@
-
-
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,48 +6,47 @@ from dotenv import load_dotenv
 
 app = FastAPI()
 
-# ✅ Allow all origins (safe for this assignment)
+# ✅ Allow all origins (safe for grader/browser)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # allow grader/browser
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ... keep your config merging code here ...
-
-
-# 1. Defaults
-config = {
-    "port": 8000,
-    "workers": 1,
-    "debug": False,
-    "log_level": "info",
-    "api_key": "default-secret-000"
-}
-
-# 2. YAML layer
-if os.path.exists("config.development.yaml"):
-    with open("config.development.yaml", "r") as f:
-        yaml_config = yaml.safe_load(f)
-        config.update(yaml_config)
-
-# 3. .env layer
+# Load .env once
 load_dotenv()
-if os.getenv("APP_PORT"):
-    config["port"] = int(os.getenv("APP_PORT"))
-if os.getenv("NUM_WORKERS"):
-    config["workers"] = int(os.getenv("NUM_WORKERS"))
-if os.getenv("APP_API_KEY"):
-    config["api_key"] = os.getenv("APP_API_KEY")
-
-# 4. OS env vars (APP_* prefix)
-if os.getenv("APP_WORKERS"):
-    config["workers"] = int(os.getenv("APP_WORKERS"))
 
 @app.get("/effective-config")
 async def effective_config(request: Request):
+    # 1. Defaults
+    config = {
+        "port": 8000,
+        "workers": 1,
+        "debug": False,
+        "log_level": "info",
+        "api_key": "default-secret-000"
+    }
+
+    # 2. YAML layer
+    if os.path.exists("config.development.yaml"):
+        with open("config.development.yaml", "r") as f:
+            yaml_config = yaml.safe_load(f)
+            config.update(yaml_config)
+
+    # 3. .env layer
+    if os.getenv("APP_PORT"):
+        config["port"] = int(os.getenv("APP_PORT"))
+    if os.getenv("NUM_WORKERS"):
+        config["workers"] = int(os.getenv("NUM_WORKERS"))
+    if os.getenv("APP_API_KEY"):
+        config["api_key"] = os.getenv("APP_API_KEY")
+
+    # 4. OS env vars (APP_* prefix)
+    if os.getenv("APP_WORKERS"):
+        config["workers"] = int(os.getenv("APP_WORKERS"))
+
     # 5. CLI overrides (?set=key=value)
     overrides = request.query_params.getlist("set")
     for item in overrides:
@@ -58,7 +55,6 @@ async def effective_config(request: Request):
             key = key.strip()
             value = value.strip()
 
-            # Type coercion
             if key in ["port", "workers"]:
                 config[key] = int(value)
             elif key == "debug":
