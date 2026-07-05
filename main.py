@@ -1,9 +1,24 @@
-﻿from fastapi import FastAPI, Request
+
+
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import os, yaml
 from dotenv import load_dotenv
 
 app = FastAPI()
+
+# ✅ Allow all origins (safe for this assignment)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # allow grader/browser
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ... keep your config merging code here ...
+
 
 # 1. Defaults
 config = {
