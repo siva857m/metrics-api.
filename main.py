@@ -29,11 +29,6 @@ async def effective_config(request: Request):
         "api_key": "default-secret-000"
     }
 
-    # 2. YAML layer
-    if os.path.exists("config.development.yaml"):
-        with open("config.development.yaml", "r") as f:
-            yaml_config = yaml.safe_load(f)
-            config.update(yaml_config)
 
     # 3. .env layer
     if os.getenv("APP_PORT"):
@@ -42,6 +37,12 @@ async def effective_config(request: Request):
         config["workers"] = int(os.getenv("NUM_WORKERS"))
     if os.getenv("APP_API_KEY"):
         config["api_key"] = os.getenv("APP_API_KEY")
+     # 2. YAML layer
+    
+    if os.path.exists("config.development.yaml"):
+        with open("config.development.yaml", "r") as f:
+            yaml_config = yaml.safe_load(f)
+            config.update(yaml_config)
 
     # 4. OS env vars (APP_* prefix)
     if os.getenv("APP_WORKERS"):
